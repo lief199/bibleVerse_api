@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Verse Generator (PHP)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📖 Bible Verse Generator</h1>
+
+    <!-- Verse Display -->
+    <div id="verse-box">
+      <p>Click the button to load a verse ✨</p>
+    </div>
+
+    <!-- Button -->
+    <button onclick="getVerse()">Get Random Verse</button>
+
+    <!-- Add Verse Form -->
+    <h2>Add New Verse</h2>
+    <form id="addVerseForm">
+      <input type="text" id="book" placeholder="Book" required><br>
+      <input type="number" id="chapter" placeholder="Chapter" required><br>
+      <input type="number" id="verse" placeholder="Verse" required><br>
+      <textarea id="text" placeholder="Verse text" required></textarea><br>
+      <button type="submit">Add Verse</button>
+    </form>
+  </div>
+
+  <script>
+    async function getVerse() {
+      try {
+        const response = await fetch("api.php");
+        const data = await response.json();
+        document.getElementById("verse-box").innerHTML = `
+          <h2>${data.book} ${data.chapter}:${data.verse}</h2>
+          <p>"${data.text}"</p>
+        `;
+      } catch (error) {
+        console.error("Error fetching verse:", error);
+      }
+    }
+
+    // Handle Add Verse
+    document.getElementById("addVerseForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const verseData = {
+        book: document.getElementById("book").value,
+        chapter: parseInt(document.getElementById("chapter").value),
+        verse: parseInt(document.getElementById("verse").value),
+        text: document.getElementById("text").value
+      };
+
+      try {
+        const response = await fetch("api.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(verseData)
+        });
+        const result = await response.json();
+        alert(result.success || result.error);
+        if (result.success) {
+          document.getElementById("addVerseForm").reset();
+        }
+      } catch (error) {
+        console.error("Error adding verse:", error);
+      }
+    });
+  </script>
+</body>
+</html>
